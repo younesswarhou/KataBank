@@ -2,9 +2,9 @@ package com.kata.service;
 
 import java.util.List;
 
-import com.kata.entities.Account;
-import com.kata.entities.Operation;
 import com.kata.exception.InsufficientBalanceException;
+import com.kata.models.Account;
+import com.kata.models.Operation;
 
 public interface IBankService {
 	public Account getAccount(String accountCode);

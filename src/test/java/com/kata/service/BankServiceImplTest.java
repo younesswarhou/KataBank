@@ -1,7 +1,5 @@
 package com.kata.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,11 +14,12 @@ import org.springframework.util.CollectionUtils;
 
 import com.kata.dao.AccountDao;
 import com.kata.dao.OperationDao;
-import com.kata.entities.Account;
-import com.kata.entities.Client;
-import com.kata.entities.Operation;
-import com.kata.entities.enums.OperationType;
 import com.kata.exception.InsufficientBalanceException;
+import com.kata.models.Account;
+import com.kata.models.Client;
+import com.kata.models.Operation;
+import com.kata.models.enums.OperationType;
+import com.kata.service.impl.BankServiceImpl;
 
 public class BankServiceImplTest extends AbstractMockitoTest {
 	
@@ -38,6 +37,7 @@ public class BankServiceImplTest extends AbstractMockitoTest {
         
         Account compte = bankServiceImpl.getAccount("dx10000a");
         
+        Assertions.assertNotNull(compte.getAccountCode());
         Assertions.assertEquals(compte.getAccountCode(),account().getAccountCode());
 	}
 	
@@ -48,7 +48,9 @@ public class BankServiceImplTest extends AbstractMockitoTest {
         
         Account account = bankServiceImpl.deposit(account().getAccountCode(), 3000.0);  
         
-        assertThat(account.getAccountCode()).isEqualTo("dx10000a");
+        Assertions.assertNotNull(account.getAccountCode());
+        Assertions.assertEquals(account.getAccountCode(), "dx10000a");
+        Assertions.assertEquals(account.getBalance(), 9000);
 	}
 	
 	@Test
@@ -58,8 +60,9 @@ public class BankServiceImplTest extends AbstractMockitoTest {
         
         Account account = bankServiceImpl.withdraw("dx10000a", 1000.0);
         
-        assertThat(account.getAccountCode()).isEqualTo("dx10000a");
-        assertThat(account.getBalance()).isEqualTo(5000.0);
+        Assertions.assertNotNull(account.getAccountCode());
+        Assertions.assertEquals(account.getAccountCode(), "dx10000a");
+        Assertions.assertEquals(account.getBalance(), 5000);
 	}
 	
 	@Test
@@ -68,6 +71,12 @@ public class BankServiceImplTest extends AbstractMockitoTest {
         
         List<Operation> operations = bankServiceImpl.getOperationsList("dx10000a");
         
+        Assertions.assertEquals(1000, operations.get(0).getAmount());
+        Assertions.assertEquals("dx10000a", operations.get(0).getAccount().getAccountCode());
+        Assertions.assertEquals(OperationType.DEPOSIT, operations.get(0).getOperationType());
+        Assertions.assertEquals(600, operations.get(1).getAmount());
+        Assertions.assertEquals("dx10000a", operations.get(1).getAccount().getAccountCode());
+        Assertions.assertEquals(OperationType.WITHDRAW, operations.get(1).getOperationType());
         Assertions.assertFalse(CollectionUtils.isEmpty(operations));
 	}
 	

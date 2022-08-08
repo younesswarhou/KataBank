@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.kata.entities.Operation;
+import com.kata.models.Operation;
 
 public interface OperationDao extends JpaRepository<Operation, Long>{
 	@Query("select o from Operation o where o.account.accountCode =:accountCode order by o.operationDate desc")

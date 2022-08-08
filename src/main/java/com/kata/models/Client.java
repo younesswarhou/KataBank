@@ -1,4 +1,4 @@
-package com.kata.entities;
+package com.kata.models;
 
 import java.io.Serializable;
 import java.util.Collection;

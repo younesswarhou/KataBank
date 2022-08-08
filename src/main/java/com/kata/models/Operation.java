@@ -1,4 +1,4 @@
-package com.kata.entities;
+package com.kata.models;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import com.kata.entities.enums.OperationType;
+import com.kata.models.enums.OperationType;
 
 @Entity
 public class Operation implements Serializable{

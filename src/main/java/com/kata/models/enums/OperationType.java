@@ -1,4 +1,4 @@
-package com.kata.entities.enums;
+package com.kata.models.enums;
 
 public enum OperationType {
 	DEPOSIT,

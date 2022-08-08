@@ -10,10 +10,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import com.kata.dao.AccountDao;
 import com.kata.dao.ClientDao;
 import com.kata.dao.OperationDao;
-import com.kata.entities.Account;
-import com.kata.entities.Client;
-import com.kata.entities.Operation;
-import com.kata.entities.enums.OperationType;
+import com.kata.models.Account;
+import com.kata.models.Client;
+import com.kata.models.Operation;
+import com.kata.models.enums.OperationType;
 import com.kata.service.IBankService;
 
 @SpringBootApplication
