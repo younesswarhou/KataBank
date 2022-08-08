@@ -1,6 +1,5 @@
 package com.kata.service;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -13,10 +12,9 @@ import org.springframework.stereotype.Service;
 import com.kata.dao.AccountDao;
 import com.kata.dao.OperationDao;
 import com.kata.entities.Account;
-import com.kata.entities.CurrentAccount;
-import com.kata.entities.Depot;
 import com.kata.entities.Operation;
-import com.kata.entities.Retrait;
+import com.kata.entities.enums.OperationType;
+import com.kata.exception.InsufficientBalanceException;
 
 @Service
 @Transactional
@@ -28,45 +26,43 @@ public class BankServiceImpl implements IBankService{
 	private OperationDao operationDao;
 
 	@Override
-	public Account getAccount(String codeAccount) {
-		Optional<Account> compte = accountDao.findByCodeAccount(codeAccount);
-		return compte.get();
+	public Account getAccount(String accountCode) {
+		Account compte = accountDao.findByAccountCode(accountCode);
+		return compte;
 	}
 
 	@Override
-	public List<Account> deposit(String codeAccount, double amount) {
-		Account account = getAccount(codeAccount);
-		Depot depot = new Depot(new Date(), amount, account);
-		List<Depot> depots = Arrays.asList(depot);
-		operationDao.saveAll(depots);
-		account.setBalance(account.getBalance() + amount);
-		List<Account> comptes = Arrays.asList(account);
-		accountDao.saveAll(comptes);
-		return comptes;
-	}
-
-	@Override
-	public List<Account> withdraw(String codeAccount, double amount) {
-		Account account = getAccount(codeAccount);
-		double cashierFacility = 0;
-		if(account instanceof CurrentAccount) {
-			cashierFacility = ((CurrentAccount) account).getDiscovered();
+	public Account deposit(String accountCode, double depositAmount) {
+		Account account = getAccount(accountCode);
+		double balanceAfterOperation = 0;
+		if(depositAmount > 0) {
+			balanceAfterOperation = account.getBalance() + depositAmount;
 		}
-		if(account.getBalance() + cashierFacility < amount) {
-			throw new RuntimeException("Insufficient balance");
-		}
-		Retrait retrait = new Retrait(new Date(), amount, account);
-		List<Retrait> retraits = Arrays.asList(retrait);
-		operationDao.saveAll(retraits);
-		account.setBalance(account.getBalance() - amount);
-		List<Account> comptes = Arrays.asList(account);
-		accountDao.saveAll(comptes);
-		return comptes;
+		Operation depositOperation = new Operation(new Date(), depositAmount, balanceAfterOperation, OperationType.DEPOSIT, account);
+		operationDao.save(depositOperation);
+		account.setBalance(balanceAfterOperation);
+		accountDao.save(account);
+		return account;
 	}
 
 	@Override
-	public List<Operation> getListOperations(String codeAccount) {
-		return operationDao.listOperations(codeAccount);
+	public Account withdraw(String codeAccount, double withdrawAmount) throws InsufficientBalanceException {
+		Account account = getAccount(codeAccount);
+		double balanceAfterOperation = 0;
+		if(withdrawAmount < account.getBalance()) {
+			balanceAfterOperation = account.getBalance() - withdrawAmount;
+		}else {
+            throw new InsufficientBalanceException("The balance in not sufficient for account code :"+ codeAccount);
+		}
+		Operation withdrawOperation = new Operation(new Date(), withdrawAmount, balanceAfterOperation, OperationType.WITHDRAW, account);
+		operationDao.save(withdrawOperation);
+		account.setBalance(balanceAfterOperation);
+		accountDao.save(account);
+		return account;
 	}
 
+	@Override
+	public List<Operation> getOperationsList(String accountCode) {
+		return operationDao.operationsList(accountCode);
+	}
 }

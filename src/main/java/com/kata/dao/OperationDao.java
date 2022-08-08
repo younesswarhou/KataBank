@@ -9,6 +9,6 @@ import org.springframework.data.repository.query.Param;
 import com.kata.entities.Operation;
 
 public interface OperationDao extends JpaRepository<Operation, Long>{
-	@Query("select o from Operation o where o.account.codeAccount =:codeAccount order by o.dateOperation desc")
-	public List<Operation> listOperations(@Param("codeAccount")String codeAccount);
+	@Query("select o from Operation o where o.account.accountCode =:accountCode order by o.operationDate desc")
+	public List<Operation> operationsList(@Param("accountCode")String accountCode);
 }

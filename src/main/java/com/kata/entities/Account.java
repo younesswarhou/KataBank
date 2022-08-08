@@ -7,8 +7,6 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -16,18 +14,17 @@ import javax.persistence.OneToMany;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class Account implements Serializable{
 
 	private static final long serialVersionUID = -6441773608178479307L;
 	@Id @GeneratedValue
 	private Long code;
-	private String codeAccount;
-	private Date dateCreation;
+	private String accountCode;
+	private Date creationDate;
 	private double balance;
 	
 	@ManyToOne
-	@JoinColumn(name="CODE_CLIENT")
+	@JoinColumn(name="clientCode")
 	private Client client;
 	
 	@JsonIgnore
@@ -38,10 +35,10 @@ public class Account implements Serializable{
 		super();
 	}
 
-	public Account(String codeAccount, Date dateCreation, double balance, Client client) {
+	public Account(String accountCode, Date creationDate, double balance, Client client) {
 		super();
-		this.codeAccount = codeAccount;
-		this.dateCreation = dateCreation;
+		this.accountCode = accountCode;
+		this.creationDate = creationDate;
 		this.balance = balance;
 		this.client = client;
 	}
@@ -54,20 +51,20 @@ public class Account implements Serializable{
 		this.code = code;
 	}
 
-	public String getCodeAccount() {
-		return codeAccount;
+	public String getAccountCode() {
+		return accountCode;
 	}
 
-	public void setCodeAccount(String codeAccount) {
-		this.codeAccount = codeAccount;
+	public void setAccountCode(String accountCode) {
+		this.accountCode = accountCode;
 	}
 
-	public Date getDateCreation() {
-		return dateCreation;
+	public Date getCreationDate() {
+		return creationDate;
 	}
 
-	public void setDateCreation(Date dateCreation) {
-		this.dateCreation = dateCreation;
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
 	}
 
 	public double getBalance() {
@@ -93,5 +90,5 @@ public class Account implements Serializable{
 	public void setOperations(Collection<Operation> operations) {
 		this.operations = operations;
 	}
-	
+
 }

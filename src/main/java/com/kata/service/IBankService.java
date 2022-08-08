@@ -4,10 +4,11 @@ import java.util.List;
 
 import com.kata.entities.Account;
 import com.kata.entities.Operation;
+import com.kata.exception.InsufficientBalanceException;
 
 public interface IBankService {
-	public Account getAccount(String codeAccount);
-	public List<Account> deposit(String codeAccount, double amount);
-	public List<Account> withdraw(String codeAccount, double amount);
-	public List<Operation> getListOperations(String codeAccount);
+	public Account getAccount(String accountCode);
+	public Account deposit(String accountCode, double depositAmount);
+	public Account withdraw(String accountCode, double withdrawAmount) throws InsufficientBalanceException;
+	public List<Operation> getOperationsList(String accountCode);
 }

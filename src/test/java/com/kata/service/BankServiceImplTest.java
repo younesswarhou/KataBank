@@ -1,9 +1,10 @@
 package com.kata.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,9 +18,9 @@ import com.kata.dao.AccountDao;
 import com.kata.dao.OperationDao;
 import com.kata.entities.Account;
 import com.kata.entities.Client;
-import com.kata.entities.Depot;
 import com.kata.entities.Operation;
-import com.kata.entities.Retrait;
+import com.kata.entities.enums.OperationType;
+import com.kata.exception.InsufficientBalanceException;
 
 public class BankServiceImplTest extends AbstractMockitoTest {
 	
@@ -30,43 +31,42 @@ public class BankServiceImplTest extends AbstractMockitoTest {
 	private AccountDao accountDao;
 	@Mock
 	private OperationDao operationDao;
-	
-	List<Operation> operations = new ArrayList<>();
-	
+		
 	@BeforeEach
 	void testConsulter() {
-        Mockito.when(accountDao.findByCodeAccount(Mockito.any())).thenReturn(account());
+        Mockito.when(accountDao.findByAccountCode(Mockito.any())).thenReturn(account());
         
         Account compte = bankServiceImpl.getAccount("dx10000a");
         
-        Assertions.assertEquals(compte.getCodeAccount(),account().get().getCodeAccount());
+        Assertions.assertEquals(compte.getAccountCode(),account().getAccountCode());
 	}
 	
 	@Test
-	void testDepot() {
-        Mockito.when(operationDao.save(Mockito.any())).thenReturn(operationDepot());
+	void testDeposit() {
+        Mockito.when(operationDao.save(Mockito.any())).thenReturn(operationDeposit());
         Mockito.when(accountDao.save(Mockito.any())).thenReturn(account());
         
-        List<Account> comptes = bankServiceImpl.deposit("dx10000a", 3000.0);  
+        Account account = bankServiceImpl.deposit(account().getAccountCode(), 3000.0);  
         
-        Assertions.assertFalse(CollectionUtils.isEmpty(comptes));
+        assertThat(account.getAccountCode()).isEqualTo("dx10000a");
 	}
 	
 	@Test
-	void testRetirer() {
-        Mockito.when(operationDao.save(Mockito.any())).thenReturn(operationRetrait());
+	void testWithdraw() throws InsufficientBalanceException {
+        Mockito.when(operationDao.save(Mockito.any())).thenReturn(operationWithdraw());
         Mockito.when(accountDao.save(Mockito.any())).thenReturn(account());
         
-        List<Account> comptes = bankServiceImpl.withdraw("dx10000a", 1000.0);
+        Account account = bankServiceImpl.withdraw("dx10000a", 1000.0);
         
-        Assertions.assertFalse(CollectionUtils.isEmpty(comptes));
+        assertThat(account.getAccountCode()).isEqualTo("dx10000a");
+        assertThat(account.getBalance()).isEqualTo(5000.0);
 	}
 	
 	@Test
 	void testGetListeOperations() {
-        Mockito.when(operationDao.listOperations(Mockito.any())).thenReturn(operations());
+        Mockito.when(operationDao.operationsList(Mockito.any())).thenReturn(operations());
         
-        List<Operation> operations = bankServiceImpl.getListOperations("dx10000a");
+        List<Operation> operations = bankServiceImpl.getOperationsList("dx10000a");
         
         Assertions.assertFalse(CollectionUtils.isEmpty(operations));
 	}
@@ -81,41 +81,40 @@ public class BankServiceImplTest extends AbstractMockitoTest {
 		return client;
 	}
 	
-	private Optional<Account> account() {
+	private Account account() {
 		Account account = new Account();
+		account.setCode(1L);
 		account.setClient(client());
-		account.setCodeAccount("dx10000a");
-		account.setDateCreation(new Date());
+		account.setAccountCode("dx10000a");
+		account.setCreationDate(new Date());
 		account.setBalance(6000.0);
-		account.setOperations(operations);
-		return Optional.of(account);
+		return account;
 	}
 	
-	private List<Operation> operationRetrait(){
-		Operation operationRetrait = new Retrait();
-		operationRetrait.setAccount(account().get());
-		operationRetrait.setDateOperation(new Date());
-		operationRetrait.setAmount(600.0);
-		operationRetrait.setNumber(1L);
-		operations.add(operationRetrait);
-		return operations;
+	private Operation operationWithdraw(){
+		Operation operationWithdraw = new Operation();
+		operationWithdraw.setAccount(account());
+		operationWithdraw.setOperationDate(new Date());
+		operationWithdraw.setAmount(600.0);
+		operationWithdraw.setCode(1L);
+		operationWithdraw.setOperationType(OperationType.WITHDRAW);
+		return operationWithdraw;
 	}
 	
-	private List<Operation> operationDepot(){
-		Operation operationDepot = new Depot();
-		List<Operation> operations = new ArrayList<>();
-		operationDepot.setAccount(account().get());
-		operationDepot.setDateOperation(new Date());
-		operationDepot.setAmount(1000.0);
-		operationDepot.setNumber(1L);
-		operations.add(operationDepot);
-		return operations;
+	private Operation operationDeposit(){
+		Operation operationDeposit = new Operation();
+		operationDeposit.setAccount(account());
+		operationDeposit.setOperationDate(new Date());
+		operationDeposit.setAmount(1000.0);
+		operationDeposit.setCode(1L);
+		operationDeposit.setOperationType(OperationType.DEPOSIT);
+		return operationDeposit;
 	}
 	
 	private List<Operation> operations(){
 		List<Operation> operationList = new ArrayList<>();
-		operationList.addAll(operationDepot());
-		operationList.addAll(operationRetrait());
+		operationList.add(operationDeposit());
+		operationList.add(operationWithdraw());
 		return operationList;
 	}
 }
